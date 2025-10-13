@@ -1,76 +1,113 @@
-<!DOCTYPE html>
+<!doctype html>
+
 <html lang="id">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Website Sederhana</title>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>PUA Inspector — U+E000–U+E0FF</title>
   <style>
-    body {
-      font-family: Arial, sans-serif;
-      background: #f7f7f7;
-      margin: 0;
-      padding: 0;
-    }
-    header {
-      background: #4a4aef;
-      color: white;
-      text-align: center;
-      padding: 1.5em 0;
-    }
-    nav {
-      background: #333;
-      display: flex;
-      justify-content: center;
-      gap: 1em;
-      padding: 0.5em 0;
-    }
-    nav a {
-      color: white;
-      text-decoration: none;
-      font-weight: bold;
-    }
-    nav a:hover {
-      color: #ffd700;
-    }
-    main {
-      padding: 2em;
-      max-width: 800px;
-      margin: auto;
-      background: white;
-      border-radius: 10px;
-      box-shadow: 0 2px 6px rgba(0,0,0,0.1);
-    }
-    footer {
-      text-align: center;
-      padding: 1em 0;
-      background: #4a4aef;
-      color: white;
-      margin-top: 2em;
-    }
+    :root{font-family:system-ui,Segoe UI,Roboto,Arial,sans-serif;color:#0b1220}
+    body{margin:0;padding:24px;background:#f7fafc}
+    header{display:flex;gap:12px;align-items:center;margin-bottom:18px}
+    h1{font-size:18px;margin:0}
+    p.lead{margin:0;color:#475569}
+    .controls{margin-left:auto;display:flex;gap:8px}
+    select,button{padding:8px;border-radius:8px;border:1px solid #cbd5e1;background:white}
+    .grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:10px;margin-top:18px}
+    .card{background:white;border-radius:10px;padding:12px;box-shadow:0 2px 6px rgba(2,6,23,0.06);display:flex;flex-direction:column;align-items:center;gap:8px}
+    .glyph{font-size:36px;line-height:1;height:46px;display:flex;align-items:center;justify-content:center}
+    .meta{font-size:12px;color:#334155}
+    .muted{color:#64748b;font-size:12px}
+    .row{width:100%;display:flex;gap:6px;align-items:center}
+    .code{font-family:monospace;background:#f1f5f9;padding:6px;border-radius:6px}
+    .copy{margin-left:auto;padding:6px 8px}
+    footer{margin-top:18px;color:#475569;font-size:13px}
+    .hidden{display:none}
   </style>
 </head>
 <body>
-
   <header>
-    <h1>Selamat Datang di Website Saya</h1>
-    <p>Website sederhana buatan sendiri 💻</p>
-  </header>
+    <div>
+      <h1>PUA Inspector — U+E000 → U+E0FF</h1>
+      <p class="lead">Tampilkan glyph yang dimapping ke Private Use Area BMP. Pilih font untuk melihat fallback.</p>
+    </div>
+    <div class="controls">
+      <label for="fontsel" class="muted">Font:</label>
+      <select id="fontsel">
+        <option value="system-ui">system-ui / default</option>
+        <option value="Arial, sans-serif">Arial</option>
+        <option value="Segoe UI, Roboto, Arial">Segoe UI / Roboto</option>
+        <option value="'Noto Color Emoji', 'Segoe UI Emoji', 'Apple Color Emoji'">Emoji fonts</option>
+        <option value="'FontAwesome', 'Font Awesome 5 Free'">Icon fonts (jika terpasang)</option>
+      </select>
+      <button id="download">Download HTML</button>
+    </div>
+  </header>  <main>
+    <div id="grid" class="grid" aria-live="polite"></div>
+  </main>  <footer>
+    <div>Petunjuk singkat: Jika glyph tidak tampil atau terlihat kotak/placeholder, font yang sedang digunakan tidak menyediakan glyph untuk codepoint tersebut. Untuk tahu asal glyph, periksa font yang digunakan sistemmu atau buka file font dengan FontForge/BabelMap.</div>
+  </footer>  <script>
+    const grid = document.getElementById('grid');
+    const fontsel = document.getElementById('fontsel');
+    const downloadBtn = document.getElementById('download');
 
-  <nav>
-    <a href="#">Beranda</a>
-    <a href="#">Tentang</a>
-    <a href="#">Kontak</a>
-  </nav>
+    function makeCard(code) {
+      const el = document.createElement('div');
+      el.className = 'card';
+      const glyph = document.createElement('div');
+      glyph.className = 'glyph';
+      glyph.textContent = String.fromCodePoint(code);
+      glyph.style.fontFamily = fontsel.value;
 
-  <main>
-    <h2>Halo, dunia!</h2>
-    <p>Ini adalah contoh website sederhana menggunakan HTML dan CSS bawaan tanpa framework. Kamu bisa menambahkan elemen, gambar, atau tombol di sini sesuai keinginanmu.</p>
-    <button onclick="alert('Halo juga 👋!')">Klik aku!</button>
-  </main>
+      const cp = document.createElement('div');
+      cp.className = 'meta';
+      const hex = code.toString(16).toUpperCase().padStart(4,'0');
+      cp.innerHTML = `<div class="row"><div class="code">U+${hex}</div><div class="muted">(${code})</div><button class="copy">Copy</button></div>`;
 
-  <footer>
-    <p>© 2025 Website Sederhana. Dibuat dengan ❤️</p>
-  </footer>
+      const info = document.createElement('div');
+      info.className='muted';
+      info.textContent = 'Glyph display depends on installed fonts.';
 
-</body>
-  </html>
+      el.appendChild(glyph);
+      el.appendChild(cp);
+      el.appendChild(info);
+
+      const copyBtn = cp.querySelector('.copy');
+      copyBtn.addEventListener('click',()=>{
+        navigator.clipboard && navigator.clipboard.writeText('U+'+hex);
+        copyBtn.textContent='Copied!';
+        setTimeout(()=>copyBtn.textContent='Copy',900);
+      });
+
+      return el;
+    }
+
+    function render() {
+      grid.innerHTML='';
+      for(let i=0xE000;i<=0xE0FF;i++){
+        const card=makeCard(i);
+        grid.appendChild(card);
+      }
+    }
+
+    fontsel.addEventListener('change',()=>{
+      const cards = grid.querySelectorAll('.card .glyph');
+      cards.forEach(g=> g.style.fontFamily = fontsel.value);
+    });
+
+    downloadBtn.addEventListener('click',()=>{
+      const blob = new Blob([document.documentElement.outerHTML],{type:'text/html;charset=utf-8'});
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = 'PUA-inspector-E000-E0FF.html';
+      document.body.appendChild(a);
+      a.click();
+      a.remove();
+      URL.revokeObjectURL(url);
+    });
+
+    // initial render
+    render();
+  </script></body>
+</html>
